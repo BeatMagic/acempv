@@ -1,0 +1,38 @@
+# MpvSDK - prebuilt libmpv for video playback (Windows only)
+
+if(NOT WIN32)
+    message(STATUS "MpvSDK: Skipping (Windows only)")
+    return()
+endif()
+
+if(POLICY CMP0111)
+    cmake_policy(SET CMP0111 NEW)
+endif()
+
+set(MPV_SDK_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/mpv")
+set(MPV_SDK_LIB_PATH "${MPV_SDK_BASE_PATH}/lib/win")
+set(MPV_SDK_INCLUDE_PATH "${MPV_SDK_BASE_PATH}/mpv/include")
+
+find_library(MPV_IMPORT_LIB NAMES mpv
+    PATHS "${MPV_SDK_LIB_PATH}" NO_DEFAULT_PATH)
+
+if(NOT MPV_IMPORT_LIB)
+    message(FATAL_ERROR "MpvSDK: mpv.lib not found in ${MPV_SDK_LIB_PATH}")
+endif()
+
+set(_mpv_dll "${MPV_SDK_LIB_PATH}/libmpv-2.dll")
+if(NOT EXISTS "${_mpv_dll}")
+    message(FATAL_ERROR "MpvSDK: libmpv-2.dll not found at ${_mpv_dll}")
+endif()
+
+add_library(MpvSDK SHARED IMPORTED GLOBAL)
+set_target_properties(MpvSDK PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${MPV_SDK_INCLUDE_PATH}"
+    IMPORTED_IMPLIB_RELEASE "${MPV_IMPORT_LIB}"
+    IMPORTED_IMPLIB_RELWITHDEBINFO "${MPV_IMPORT_LIB}"
+    IMPORTED_LOCATION_RELEASE "${_mpv_dll}"
+    IMPORTED_LOCATION_RELWITHDEBINFO "${_mpv_dll}"
+)
+
+message(STATUS "MpvSDK import lib: ${MPV_IMPORT_LIB}")
+message(STATUS "MpvSDK runtime DLL: ${_mpv_dll}")

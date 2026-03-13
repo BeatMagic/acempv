@@ -1,0 +1,16 @@
+LIBRARY libmpv-2
+EXPORTS
+    mpv_create
+    mpv_initialize
+    mpv_terminate_destroy
+    mpv_set_option
+    mpv_set_option_string
+    mpv_command
+    mpv_command_string
+    mpv_set_property
+    mpv_set_property_string
+    mpv_get_property
+    mpv_get_property_string
+    mpv_free
+    mpv_wait_event
+    mpv_error_string
