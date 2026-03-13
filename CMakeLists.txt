@@ -1,4 +1,11 @@
+cmake_minimum_required(VERSION 3.16)
+
 # MpvSDK - prebuilt libmpv for video playback (Windows only)
+project(acempv
+        VERSION 0.0.41
+        DESCRIPTION "Precompiled mpv libraries for cross-platform development"
+        LANGUAGES C CXX
+)
 
 if(NOT WIN32)
     message(STATUS "MpvSDK: Skipping (Windows only)")
@@ -11,7 +18,7 @@ endif()
 
 set(MPV_SDK_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/mpv")
 set(MPV_SDK_LIB_PATH "${MPV_SDK_BASE_PATH}/lib/win")
-set(MPV_SDK_INCLUDE_PATH "${MPV_SDK_BASE_PATH}/mpv/include")
+set(MPV_SDK_INCLUDE_PATH "${MPV_SDK_BASE_PATH}/include")
 
 find_library(MPV_IMPORT_LIB NAMES mpv
     PATHS "${MPV_SDK_LIB_PATH}" NO_DEFAULT_PATH)
@@ -36,3 +43,20 @@ set_target_properties(MpvSDK PROPERTIES
 
 message(STATUS "MpvSDK import lib: ${MPV_IMPORT_LIB}")
 message(STATUS "MpvSDK runtime DLL: ${_mpv_dll}")
+
+# 导出配置
+include(CMakePackageConfigHelpers)
+
+# 创建版本文件
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/acempvConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+)
+
+# 创建配置文件
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/acempvConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/acempvConfig.cmake"
+        INSTALL_DESTINATION "lib/cmake/acempv"
+)

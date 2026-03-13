@@ -1,0 +1,68 @@
+@PACKAGE_INIT@
+
+# acempv预编译库配置文件（仅支持Windows）
+# 版本: @PROJECT_VERSION@
+
+set(MPV_VERSION "@PROJECT_VERSION@")
+
+# acempv仅支持Windows平台
+if(NOT WIN32)
+    set(acempv_FOUND FALSE)
+    set(acempv_NOT_FOUND_MESSAGE "acempv (libmpv) is only supported on Windows")
+    return()
+endif()
+
+# 查找头文件目录
+find_path(MPV_INCLUDE_DIR
+    NAMES mpv/client.h
+    PATHS "@PACKAGE_CMAKE_INSTALL_PREFIX@/include"
+          "${CMAKE_CURRENT_LIST_DIR}/../../../mpv/include"
+          "${CMAKE_CURRENT_LIST_DIR}/../../mpv/include"
+    NO_DEFAULT_PATH
+)
+
+# 设置库文件目录
+set(MPV_LIB_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib")
+if(NOT EXISTS "${MPV_LIB_DIR}")
+    set(MPV_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../mpv/lib/win")
+endif()
+
+# 检查必要文件是否存在
+set(acempv_FOUND TRUE)
+
+if(NOT EXISTS "${MPV_INCLUDE_DIR}")
+    set(acempv_FOUND FALSE)
+    set(acempv_NOT_FOUND_MESSAGE "Could not find mpv include directory (expected mpv/client.h)")
+endif()
+
+if(acempv_FOUND AND NOT EXISTS "${MPV_LIB_DIR}/mpv.lib")
+    set(acempv_FOUND FALSE)
+    set(acempv_NOT_FOUND_MESSAGE "Could not find mpv.lib in ${MPV_LIB_DIR}")
+endif()
+
+if(acempv_FOUND AND NOT EXISTS "${MPV_LIB_DIR}/libmpv-2.dll")
+    set(acempv_FOUND FALSE)
+    set(acempv_NOT_FOUND_MESSAGE "Could not find libmpv-2.dll in ${MPV_LIB_DIR}")
+endif()
+
+# 创建导入目标（如果尚未创建）
+if(acempv_FOUND AND NOT TARGET acempv::MpvSDK)
+    add_library(acempv::MpvSDK SHARED IMPORTED)
+
+    set_target_properties(acempv::MpvSDK PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${MPV_INCLUDE_DIR}"
+        IMPORTED_IMPLIB              "${MPV_LIB_DIR}/mpv.lib"
+        IMPORTED_LOCATION            "${MPV_LIB_DIR}/libmpv-2.dll"
+    )
+endif()
+
+# 设置变量供旧式CMake使用
+if(acempv_FOUND)
+    set(MPV_INCLUDE_DIRS  "${MPV_INCLUDE_DIR}")
+    set(MPV_LIBRARY_DIR   "${MPV_LIB_DIR}")
+    set(MPV_IMPLIB        "${MPV_LIB_DIR}/mpv.lib")
+    set(MPV_DLL           "${MPV_LIB_DIR}/libmpv-2.dll")
+    set(MPV_LIBRARIES     acempv::MpvSDK)
+endif()
+
+check_required_components(acempv)
