@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
 # MpvSDK - prebuilt libmpv for video playback (Windows only)
+#
+# The prebuilt libmpv-2.dll is a MinGW-compiled binary. We consume it from MSVC
+# through its pure C API (extern "C", opaque handles, no CRT sharing), so:
+#   - It links correctly with any MSVC toolchain.
+#   - It works in all build configurations (Debug/Release/RelWithDebInfo) without
+#     debug-vs-release CRT conflicts.
+# See README.md for details.
 project(acempv
         VERSION 0.0.41
         DESCRIPTION "Precompiled mpv libraries for cross-platform development"
